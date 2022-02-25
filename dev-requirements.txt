@@ -1,0 +1,10 @@
+coverage
+pathvalidate
+pre-commit~=2.10.1
+pytest
+pytest-cov
+pytest-django
+pytest-mock
+requests~=2.25.1
+requests-mock~=1.9.3
+statsmodels==0.12.2

@@ -1,0 +1,17 @@
+[run]
+; Include only source code actually in this repository.
+include =
+  ./kartoza/*
+  ./apps/*
+
+; Omit manage.py. as there's nothing custom in there.
+omit =
+  manage.py
+  ./kartoza/wsgi.py
+  ./kartoza/asgi.py
+  ./kartoza/urls.py
+  env/*
+  .venv
+  *migrations*
+  *__init__.py
+  *.css

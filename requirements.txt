@@ -1,0 +1,19 @@
+numpy
+pandas
+rdp
+shapely
+# gdal
+fiona
+pyproj
+six
+rtree
+psycopg2-binary
+sqlAlchemy
+GeoAlchemy2
+geopy
+geopandas
+Django~=3.1.6
+environs[django]~=9.3.1
+gunicorn
+# postgis
+# geopandas-postgis
