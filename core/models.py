@@ -20,10 +20,20 @@ class UserManager(BaseUserManager):
         :param password: If a password is provided, it will be hashed and set on the user
         :return: A user instance
         """
-        user = self.model(email=email, **extra_fields)
+        if not email:
+            raise ValueError('User must have an email address.')
+        user = self.model(email=self.normalize_email(email), **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
 
+        return user
+
+    def create_superuser(self, email, password):
+        """Create a Django super user."""
+        user = self.create_user(email, password)
+        user.is_staff = True
+        user.is_superuser = True
+        user.save()
         return user
 
 
