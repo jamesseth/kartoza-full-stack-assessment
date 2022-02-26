@@ -9,8 +9,13 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-
 from pathlib import Path
+
+from django.core.management import utils
+from environs import Env
+# Environs Config
+env = Env()
+env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +25,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '1d7i2#!+$4c!7cmscojj@6sv+8h2%4i)85ba+$mjxl-tov-fkd'
+if env.str('DJANGO_SECRET_KEY', None) is None:
+    SECRET_KEY = utils.get_random_secret_key()
+    with open('.env', 'a+') as env_file:
+        env_file.write(f'DJANGO_SECRET_KEY={SECRET_KEY}')
+
+else:
+    # must fail if none ( fail fast )
+    SECRET_KEY = env.str('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -37,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'core',
 ]
 
 MIDDLEWARE = [
@@ -75,9 +88,13 @@ WSGI_APPLICATION = 'kartoza.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': env.str('DJANGO_DB_DATABASE'),
+        'USER': env.str('DJANGO_DB_USERNAME'),
+        'PASSWORD': env.str('DJANGO_DB_PASSWORD'),
+        'HOST': env.str('DJANGO_DB_HOST', 'localhost'),
+        'PORT': env.str('DJANGO_DB_PORT', '5432'),
+    },
 }
 
 
@@ -118,3 +135,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Set the custom user model.
+AUTH_USER_MODEL = 'core.user'

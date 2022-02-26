@@ -1,0 +1,1 @@
+"""Make django project package."""

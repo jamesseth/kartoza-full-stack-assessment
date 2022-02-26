@@ -65,3 +65,15 @@ attach: ## Attach to docker-compose services eg.. make attach DC=django
 pre-commit: ## Run pre-commits.
 	[[ $$(pip3 list | grep pre-commit) ]] && true || pip3 install pre-commit
 	pre-commit run -a
+
+.PHONY: create-app
+create-app: ## Create a new Django app.
+	docker-compose -p $(PROJECT_ID) -f docker-compose.yml run django sh -c "python3 manage.py startapp $(APP_NAME)"
+
+.PHONY: migrations
+migrations: ## Django make Migration
+	docker-compose -p $(PROJECT_ID) -f docker-compose.yml run django sh -c "python3 manage.py makemigrations && python3 manage.py migrate"
+
+.PHONY: test
+test: ## Run Django unit-tests.
+	docker-compose -p $(PROJECT_ID) -f docker-compose.yml run django sh -c "python3 manage.py test"
