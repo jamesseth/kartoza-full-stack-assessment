@@ -43,6 +43,6 @@ jobs:
           DJANGO_DB_PASSWORD: postgres
           DJANGO_DB_HOST: localhost
           DJANGO_DB_PORT: 5432
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
         run: |
           coverage run -m pytest tests/ && coverage xml -o coverage.xml
