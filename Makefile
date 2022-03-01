@@ -38,6 +38,7 @@ help: ## Prints help for targets with comments.
 .PHONY: build
 build: Dockerfile docker-compose.yml ## Build docker images.
 	[ ! -f .env ] && cp .env.template .env || true;
+	docker build -t "$(PROJECT_ID)-postgis" ./Dockerfile.postgis
 	docker-compose -p "$(PROJECT_ID)" build
 
 .PHONY: start

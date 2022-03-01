@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'core',
+    'map_routing'
 ]
 
 MIDDLEWARE = [
@@ -63,7 +64,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'kartoza.urls'
-
+TEMPLATE_DIR = (BASE_DIR / 'map_routing/templates').resolve()
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -88,7 +89,7 @@ WSGI_APPLICATION = 'kartoza.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': env.str('DJANGO_DB_DATABASE'),
         'USER': env.str('DJANGO_DB_USERNAME'),
         'PASSWORD': env.str('DJANGO_DB_PASSWORD'),
@@ -134,7 +135,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
+STATICFILES_DIRS = (
+    (BASE_DIR / 'map_routing' / 'static_files').resolve(),
+)
 STATIC_URL = '/static/'
-
+STATIC_ROOT = (BASE_DIR / 'staticfiles').resolve()
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 # Set the custom user model.
 AUTH_USER_MODEL = 'core.user'

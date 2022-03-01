@@ -15,5 +15,6 @@ rtree
 shapely
 six
 sqlAlchemy
+whitenoise
 # postgis
 # geopandas-postgis

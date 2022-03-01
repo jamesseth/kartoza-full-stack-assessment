@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Draw a polyline given many coordinates</title>
+{% block content %}
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<style type="text/css">
+html { height: 100% }
+body { height: 100%; margin: 0; padding: 0 }
+#map_canvas { height: 100% }
+</style>
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js"></script>
+
+<script>
+
+    const renderPolygon = (polyCoords) => {
+        console.log(polyCoords);
+        //var arrCoords = new Array();
+        //{% for coord in  polyCoords %}
+        //    {% for point in  coord %}
+        //        console.log({{ point }})
+        //        arrCoords.push(new google.maps.LatLng{{ point }} );
+        //    {% endfor %}
+        //{% endfor %}
+
+    }
+    function initialize() {
+        var homeLatlng = new google.maps.LatLng(-30.0, 20.476706);
+        var myOptions = {
+            zoom: 5,
+            center: homeLatlng,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+        var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+
+        var arrCoords = new Array();
+
+        var i = 0;
+        {% for poly in polygons %}
+        arrCoords.push(new Array());
+        {% for coord in  poly %}
+                arrCoords[i].push(new google.maps.LatLng{{ coord }} );
+        {% endfor %}
+        new google.maps.Polyline({
+            path: arrCoords[i],
+            strokeColor: '#'+Math.floor(Math.random()*16777215).toString(16),
+            strokeOpacity: 1.0,
+            strokeWeight: 4,
+            geodesic: false,
+            map: map});
+        i++;
+        {% endfor %}
+
+
+
+    }
+
+    google.maps.event.addDomListener(window, 'load', initialize);
+</script>
+</head>
+<body>
+  <div id="map_canvas"></div>
+</body>
+{% endblock %}
+</html>
