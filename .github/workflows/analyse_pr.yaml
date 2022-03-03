@@ -34,4 +34,4 @@ jobs:
           DJANGO_DB_PORT: 5432
           DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
         run: |
-          make pre-commit
+          make test
