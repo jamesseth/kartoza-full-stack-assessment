@@ -10,10 +10,28 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
 RUN apt-get update \
-    && apt-get install -y build-essential gcc python3-dev \
-    locales gnupg2 wget ca-certificates rpl pwgen software-properties-common  \
-    iputils-ping apt-transport-https curl gettext libxml2-dev zlib1g-dev netcat gdal-bin
+    && apt-get install -y \
+    build-essential \
+    gcc \
+    python3-dev \
+    locales \
+    gnupg2 \
+    wget \
+    ca-certificates \
+    rpl \
+    pwgen \
+    software-properties-common \
+    iputils-ping \
+    apt-transport-https \
+    curl \
+    gettext \
+    libxml2-dev \
+    zlib1g-dev \
+    netcat \
+    gdal-bin
 
+RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal
+RUN export C_INCLUDE_PATH=/usr/include/gdal
 COPY requirements.txt .
 
 RUN pip3 install --upgrade pip

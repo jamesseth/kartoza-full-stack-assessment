@@ -1,14 +1,7 @@
+"""Implement an Object to apply filtering to a Polygon."""
 import statistics
 from typing import List
 from typing import Tuple
-
-class CoordSpike():
-    def __init__(self,series, index, value):
-        self.series = series
-        self.index = index
-        self.value = value
-        self.results = value
-
 
 
 class PolySpikeFilter():
@@ -23,14 +16,18 @@ class PolySpikeFilter():
         6. join processed coordinates into a list of paired coordinates.
         7. return the results.
     """
+    MAP_CENTER = None
 
     def __init__(self, poly):
         """Instantiate object."""
         self.polygon = poly
         self.lat_coords = []
         self.lon_coords = []
+        self.center_of_poly = None
         self.dummy_value = '*'
+        self.filtered_poly = []
         self.split_coords()
+        self.execute()
 
     def split_coords(self) -> None:
         """
@@ -39,7 +36,7 @@ class PolySpikeFilter():
         One for latitudes and one for longitudes.
         """
         for point in self.polygon:
-            for lat, lon in point:
+            for lon, lat in point:
                 self.lat_coords.append(lat)
                 self.lon_coords.append(lon)
 
@@ -50,7 +47,8 @@ class PolySpikeFilter():
         """
         return list(zip(*[self.lat_coords, self.lon_coords]))
 
-    def get_difference(self, numbers, count=1):
+    def get_difference(self, numbers: List[float], count: int = 1) -> List[float]:
+        """Calculate the count difference of the parsed numbers."""
         if count > 0:
             count -= 1
             results = []
@@ -59,7 +57,13 @@ class PolySpikeFilter():
 
             return self.get_difference(results, count)
 
-    def interpolate_coords(self, coords):
+    def interpolate_coords(self, coords) -> List[float]:
+        """
+        Apply linear interpolation to spikes.
+
+        :param coords: List of coordinates to process.
+        :return: Interpolate series of coordinates.
+        """
         previous_number = None
         spike_found = False
         spike_index = None
@@ -80,7 +84,14 @@ class PolySpikeFilter():
                     break
         return coords
 
-    def filter_by_stddev(self, numbers, tolerance=1.2):
+    def filter_by_stddev(self, numbers: List[float], tolerance: float = 1.2):
+        """
+        Filterout coordinate greater than the standard deviation times a tolerance.
+
+        :param numbers: The list of numbers to filter
+        :param tolerance: The tolerance is a value that is multiplied by the standard deviation
+        :return: A list of coordinates.
+        """
         curr_stdev = statistics.stdev(numbers)
 
         results = []
@@ -88,6 +99,20 @@ class PolySpikeFilter():
             if curr_stdev * -tolerance <= numbers[index] - numbers[index + 1] <= curr_stdev * tolerance:
                 results.append(numbers[index])
             else:
-                results.append(270.0)
+                results.append(self.dummy_value)
 
         return self.interpolate_coords(results)
+
+    def get_center_of_polly(self):
+        lat_cnt = (max(self.lat_coords) + min(self.lat_coords)) * .5
+        lon_cnt = (max(self.lon_coords) + min(self.lon_coords)) * .5
+        if PolySpikeFilter.MAP_CENTER:
+            lat_cnt = (lat_cnt + PolySpikeFilter.MAP_CENTER[0]) * .5
+            lon_cnt = (lon_cnt + PolySpikeFilter.MAP_CENTER[1]) * .5
+        PolySpikeFilter.MAP_CENTER = (lat_cnt, lon_cnt)
+
+    def execute(self):
+        self.lat_coords = self.filter_by_stddev(self.lat_coords)
+        self.lon_coords = self.filter_by_stddev(self.lon_coords)
+        self.get_center_of_polly()
+        self.filtered_poly = self.join_coords()
