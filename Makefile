@@ -38,6 +38,7 @@ help: ## Prints help for targets with comments.
 .PHONY: build
 build: Dockerfile docker-compose.yml ## Build docker images.
 	[ ! -f .env ] && cp .env.template .env || true;
+	docker build -t "$(PROJECT_ID)-postgis" ./Dockerfile.postgis
 	docker-compose -p "$(PROJECT_ID)" build
 
 .PHONY: start
@@ -76,4 +77,13 @@ migrations: ## Django make Migration
 
 .PHONY: test
 test: ## Run Django unit-tests.
-	docker-compose -p $(PROJECT_ID) -f docker-compose.yml run django sh -c "python3 manage.py test"
+	docker-compose -p $(PROJECT_ID) -f docker-compose.yml run django sh -c " pip install -r dev-requirements.txt && coverage run -m pytest tests/ && coverage xml -o coverage.xml"
+
+.PHONY: ingest
+ingest:
+	ogr2ogr -update -append -progress -f PostgreSQL PG:"dbname=$(DJANGO_DB_NAME) host=$(DJANGO_DB_HOST) user=$(DJANGO_DB_USER) password=$(DJANGO_DB_PASS) port=$(DJANGO_DB_PORT)" "$(FILE_PATH)"
+
+.PHONY: export-to-gpkg
+export-to-gpkg:
+
+	set -x && docker-compose exec django sh -c 'ogr2ogr -f GPKG $(OUTPUT_FILE) "PG:host=$(DJANGO_DB_HOST) dbname=$(DJANGO_DB_DATABASE) user=$(DJANGO_DB_USERNAME) password=$(DJANGO_DB_PASSWORD) port=$(DJANGO_DB_PORT) " -sql "select * from spikey_polygons"'

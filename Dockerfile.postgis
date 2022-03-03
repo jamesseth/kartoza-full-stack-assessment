@@ -1,0 +1,8 @@
+FROM postgres:14
+
+RUN mkdir -p /usr/share/postgresql/14/extension/ \
+    && touch /usr/share/postgresql/14/extension/pgrouting.control
+RUN apt-get -y update \
+    && apt-get install -y postgis postgresql-14-postgis-3 postgresql-14-pgrouting
+
+COPY data_warehouse/ /docker-entrypoint-init-db.d/

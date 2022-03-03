@@ -1,0 +1,117 @@
+<html>
+
+<title>Kartoza</title>
+
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<style type="text/css">
+html { height: 100% }
+body { height: 100%; margin: 0; padding: 0 }
+#map_canvas { height: 80%; width: 100%;}
+/* Style the navbar */
+#navbar {
+  overflow: hidden;
+  background-color: #333;
+}
+
+/* Navbar links */
+#navbar a {
+  float: left;
+  display: block;
+  color: #f2f2f2;
+  text-align: center;
+  padding: 14px;
+  text-decoration: none;
+}
+
+
+
+
+
+
+
+</style>
+<body>
+    <div id="navbar">
+        <a href="#home">Home</a>
+        <a href="#news">News</a>
+        <a href="#contact">Contact</a>
+    </div>
+    <div id="map_canvas"></div>
+    <div id="control-box">
+         <button>Open</button>
+    </div>
+<body>
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js"></script>
+<script>
+
+
+
+
+
+class KartozaPolygon{
+    constructor(polygon, map){
+
+        this.map = map
+        this.polygon = polygon;
+        this.coordinates = new Array();
+        this.polylines = new Array();
+        this.createCoordinates();
+        this.createPolylines()
+
+
+        this.addOnClickListener(this)
+    }
+
+    export_to_file(){
+
+    }
+
+    createCoordinates(){
+        console.log(this.polygon)
+        this.polygon.forEach((coord) => {
+            console.log(coord)
+            this.coordinates.push(new google.maps.LatLng(coord[0], coord[1]));
+        });
+    }
+
+    createPolylines(){
+        this.polylines = new google.maps.Polyline({
+        path: this.coordinates,
+        strokeColor: '#'+Math.floor(Math.random()*16777215).toString(16),
+        strokeOpacity: 1.0,
+        strokeWeight: 4,
+        geodesic: false,
+        map: this.map});
+    }
+
+    addOnClickListener(self){
+        google.maps.event.addListener(this.polylines, 'click', function (event) {
+            alert(self.polygon);
+        });
+    }
+}
+const initialize = (() => {
+    var homeLatlng = new google.maps.LatLng{{ map_center }};
+        var myOptions = {
+            zoom: 8,
+            center: homeLatlng,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+        var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+
+    const pollies = new Array();
+    const polygons = {{ polygons | safe }}
+    for (poly in polygons){
+        console.log(polygons[poly])
+        new KartozaPolygon( polygons[poly] , map);
+    }
+
+
+});
+
+google.maps.event.addDomListener(window, 'load', initialize);
+
+window.onscroll = function() {myFunction()};
+
+</script>
+</html>
