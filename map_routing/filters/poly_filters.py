@@ -7,6 +7,7 @@ from typing import Tuple
 class PolySpikeFilter():
     """
     Filter a polygon via coordinates with no time or sample data rate.
+
     The filtering takes the following steps:
         1. Split coordinates into latitude and longitude lists.
         2. Calculate the first difference for both list of coordinates.
@@ -16,6 +17,7 @@ class PolySpikeFilter():
         6. join processed coordinates into a list of paired coordinates.
         7. return the results.
     """
+
     MAP_CENTER = None
 
     def __init__(self, poly):
@@ -42,7 +44,8 @@ class PolySpikeFilter():
 
     def join_coords(self) -> List[Tuple]:
         """
-        Takes the lat and lon coordinates and returns a list of tuples of coordinates.
+        Take the lat and lon coordinates and return coordinates.
+
         :return: A list of tuples.
         """
         return list(zip(*[self.lat_coords, self.lon_coords]))
@@ -86,17 +89,20 @@ class PolySpikeFilter():
 
     def filter_by_stddev(self, numbers: List[float], tolerance: float = 1.2):
         """
-        Filterout coordinate greater than the standard deviation times a tolerance.
+        Replace coordinate greater than the standard deviation times a tolerance.
 
         :param numbers: The list of numbers to filter
-        :param tolerance: The tolerance is a value that is multiplied by the standard deviation
+        :param tolerance: The tolerance is a value that is multiplied
+                          by the standard deviation
         :return: A list of coordinates.
         """
         curr_stdev = statistics.stdev(numbers)
 
         results = []
         for index in range(0, len(numbers)-1):
-            if curr_stdev * -tolerance <= numbers[index] - numbers[index + 1] <= curr_stdev * tolerance:
+            if (curr_stdev * -tolerance <=
+                    numbers[index] - numbers[index + 1]
+                    <= curr_stdev * tolerance):
                 results.append(numbers[index])
             else:
                 results.append(self.dummy_value)
@@ -104,6 +110,7 @@ class PolySpikeFilter():
         return self.interpolate_coords(results)
 
     def get_center_of_polly(self):
+        """Calculate the center of all polygons to center the map."""
         lat_cnt = (max(self.lat_coords) + min(self.lat_coords)) * .5
         lon_cnt = (max(self.lon_coords) + min(self.lon_coords)) * .5
         if PolySpikeFilter.MAP_CENTER:
@@ -112,6 +119,7 @@ class PolySpikeFilter():
         PolySpikeFilter.MAP_CENTER = (lat_cnt, lon_cnt)
 
     def execute(self):
+        """Apply filter to polygon."""
         self.lat_coords = self.filter_by_stddev(self.lat_coords)
         self.lon_coords = self.filter_by_stddev(self.lon_coords)
         self.get_center_of_polly()

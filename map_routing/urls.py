@@ -1,3 +1,4 @@
+"""Url paths implementations for map routing app."""
 from django.urls import path
 
 from . import views
