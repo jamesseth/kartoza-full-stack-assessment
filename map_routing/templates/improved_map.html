@@ -23,12 +23,6 @@ body { height: 100%; margin: 0; padding: 0 }
   text-decoration: none;
 }
 
-
-
-
-
-
-
 </style>
 <body>
     <div id="navbar">
@@ -67,9 +61,7 @@ class KartozaPolygon{
     }
 
     createCoordinates(){
-        console.log(this.polygon)
         this.polygon.forEach((coord) => {
-            console.log(coord)
             this.coordinates.push(new google.maps.LatLng(coord[0], coord[1]));
         });
     }
@@ -80,7 +72,7 @@ class KartozaPolygon{
         strokeColor: '#'+Math.floor(Math.random()*16777215).toString(16),
         strokeOpacity: 1.0,
         strokeWeight: 4,
-        geodesic: false,
+        geodesic: true,
         map: this.map});
     }
 
@@ -102,7 +94,6 @@ const initialize = (() => {
     const pollies = new Array();
     const polygons = {{ polygons | safe }}
     for (poly in polygons){
-        console.log(polygons[poly])
         new KartozaPolygon( polygons[poly] , map);
     }
 
