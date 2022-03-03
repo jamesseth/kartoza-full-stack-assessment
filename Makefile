@@ -77,7 +77,7 @@ migrations: ## Django make Migration
 
 .PHONY: test
 test: ## Run Django unit-tests.
-	docker-compose -p $(PROJECT_ID) -f docker-compose.yml run django sh -c "python3 manage.py test"
+	docker-compose -p $(PROJECT_ID) -f docker-compose.yml run django sh -c " pip install -r dev-requirements.txt && coverage run -m pytest tests/ && coverage xml -o coverage.xml"
 
 .PHONY: ingest
 ingest:

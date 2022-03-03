@@ -1,5 +1,4 @@
 coverage
-gdal
 pathvalidate
 pre-commit~=2.10.1
 pytest
