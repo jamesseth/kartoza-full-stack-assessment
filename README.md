@@ -19,6 +19,7 @@ are replace with dummy values `*` which are later filled by using linear interpo
 
 ## Development setup:
     To get up and running just run from a bash terminal `make start` (ensure you are in the root directory of the project.)
+    Then run `make migrations`.  open the url http://0.0.0.0:8000
 
     To display the help menu for the make targets run:
     `make help`
