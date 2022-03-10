@@ -9,6 +9,7 @@ from typing import Union
 import geopandas
 from django.http import FileResponse
 from django.http import HttpResponse
+from django.shortcuts import redirect
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 from environs import Env
@@ -51,9 +52,6 @@ def get_polygons():
 @require_http_methods(['GET'])
 def render_route(request):
     """Display polygons on map."""
-    # return render(request, 'improved_map.html',
-    #               dict(polygons=None,
-    #               map_center=None))
     pollies = get_polygons()
     filtered_polygons = []
     for poly in pollies:
@@ -79,7 +77,6 @@ def upload_geopackage(request) -> HttpResponse:
 
         gdf = geopandas.read_file(output_filename)
         json_data = json.loads(gdf.to_json())
-
         for entry in json_data['features']:
             data = {
                 'file_id': entry['id'],
@@ -88,7 +85,7 @@ def upload_geopackage(request) -> HttpResponse:
             }
             SpikeyPolygon(**data).save()
 
-    return HttpResponse(200)
+    return redirect('/')
 
 
 @require_http_methods('POST')

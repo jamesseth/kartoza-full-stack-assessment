@@ -81,7 +81,8 @@ class PolySpikeFilter():
                     spike_found = True
                     spike_index = index
 
-                elif value != self.dummy_value and spike_found is True:
+                elif value and previous_number and value != self.dummy_value \
+                        and spike_found is True:
                     coords[spike_index] = (value + previous_number) / 2
                     previous_number = None
                     spike_found = False

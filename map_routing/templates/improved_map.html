@@ -197,9 +197,15 @@
             }
 
             const initialize = (() => {
-            var homeLatlng = new google.maps.LatLng{{ map_center }};
+                {% if map_center %}
+                    var homeLatlng = new google.maps.LatLng{{ map_center }};
+                    var mapZoom = 8
+                {% else %}
+                    var homeLatlng = new google.maps.LatLng(0,0)
+                    var mapZoom = 4
+                {% endif %}
                 var myOptions = {
-                    zoom: 8,
+                    zoom: mapZoom,
                     center: homeLatlng,
                     mapTypeId: google.maps.MapTypeId.ROADMAP
                 };
@@ -216,7 +222,6 @@
 
             google.maps.event.addDomListener(window, 'load', initialize);
 
-            window.onscroll = function() {myFunction()};
 
          </script>
 </html>
