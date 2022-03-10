@@ -59,8 +59,7 @@ logs: ## Start Containers.
 
 .PHONY: attach
 attach: ## Attach to docker-compose services eg.. make attach DC=django
-	docker exec -it \
-	$($(SHELL) docker ps -f name="$(PROJECT_ID)_$(DC)" --format "{{.ID}}") bash
+	docker-compose exec $(DC) $(SHELL)
 
 .PHONY: pre-commit
 pre-commit: ## Run pre-commits.
@@ -72,7 +71,7 @@ create-app: ## Create a new Django app.
 	docker-compose -p $(PROJECT_ID) -f docker-compose.yml run django sh -c "python3 manage.py startapp $(APP_NAME)"
 
 .PHONY: migrations
-migrations: ## Django make Migration
+migrations: ## Django makemigration and migrate.
 	docker-compose -p $(PROJECT_ID) -f docker-compose.yml run django sh -c "python3 manage.py makemigrations && python3 manage.py migrate"
 
 .PHONY: test
