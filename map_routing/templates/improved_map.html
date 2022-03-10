@@ -1,117 +1,227 @@
 <html>
+   <title>Kartoza</title>
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js" integrity="sha512-dqw6X88iGgZlTsONxZK9ePmJEFrmHwpuMrsUChjAw1mRUhUITE5QU9pkcSox+ynfLhL15Sv2al5A0LVyDCmtUw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+   <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+   <style type="text/css">
+      html { height: 100% }
+      body { height: 100%; margin: 0; padding: 0 }
+      #map_canvas { height: 100%; width: 100%;}
+      /* Style the navbar */
+      #navbar {
+      overflow: hidden;
+      background-color: #333;
+      }
+      /* Navbar links */
+      #navbar a {
+      float: left;
+      display: block;
+      color: #f2f2f2;
+      text-align: center;
+      padding: 14px;
+      text-decoration: none;
+      }
+   </style>
+   <body>
+      <div id="navbar">
+         <a href="#home">Home</a>
+         <a onClick="openFile();">Open</a>
+         <a onClick="saveFile();">Save</a>
+      </div>
+      <div id="map_canvas"></div>
+      <div class="ui basic modal upload">
+         <div class="ui icon header">
+            <i class="map icon"></i>
+            Upload A GeoPackage File
+         </div>
+         <div class="content ">
+            <div class="ui equal width center aligned padded grid">
+               <form class="ui form" action="{% url 'map_routing:upload_geopackage' %}" method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  <div class="field">
+                     <input type="file" name="file" placeholder="Select a file">
+                  </div>
+                  <div class="actions">
+                     <div class="ui red basic cancel inverted button">
+                        <i class="remove icon"></i>
+                        Cancel
+                     </div>
+                     <button class="ui green ok inverted button" type="submit">Upload</button>
+                  </div>
+               </form>
+            </div>
+         </div>
+      </div>
+      <div class="ui basic modal save">
+         <div class="ui icon header">
+            <i class="file alternate icon"></i>
+            Export Polygon To File.
+         </div>
+         <div class="content ">
+            <div class="ui equal width center aligned padded grid">
+               <form class="ui form" onsubmit="return exportFile();">
+                  {% csrf_token %}
+                  <div class="field">
+                     <input type="text" name="file-name" placeholder="Please enter a file name.">
+                  </div>
+                  <div class="actions">
+                     <div class="ui red basic cancel inverted button">
+                        <i class="remove icon"></i>
+                        Cancel
+                     </div>
+                     <button class="ui green ok inverted button" type="submit">Export</button>
+                  </div>
+               </form>
+            </div>
+         </div>
+      </div>
+      <body>
+         <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js"></script>
+         <script>
+            var selected_poly = null;
+            const polygons = {{ polygons | safe }}
+            const openFile = () => {
+                $('.ui.basic.modal.upload').modal('show');
+            }
 
-<title>Kartoza</title>
+            const saveFile = () => {
+                $('.ui.basic.modal.save').modal('show');
+            }
 
-<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-<style type="text/css">
-html { height: 100% }
-body { height: 100%; margin: 0; padding: 0 }
-#map_canvas { height: 80%; width: 100%;}
-/* Style the navbar */
-#navbar {
-  overflow: hidden;
-  background-color: #333;
-}
+            const getCookie = (name) => {
+                var cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        var cookie = jQuery.trim(cookies[i]);
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            const downloadFileResponse = (res) => {
+                try {
+                    res.blob().then((data) => {
+                    const newBlob = new Blob([data]);
 
-/* Navbar links */
-#navbar a {
-  float: left;
-  display: block;
-  color: #f2f2f2;
-  text-align: center;
-  padding: 14px;
-  text-decoration: none;
-}
+                    const blobUrl = window.URL.createObjectURL(newBlob);
 
+                    const link = document.createElement('a');
+                    link.href = blobUrl;
+                    link.setAttribute('download', `geopackage.gpkg`);
+                    document.body.appendChild(link);
+                    link.click();
+                    link.parentNode.removeChild(link);
 
+                    // clean up Url
+                    window.URL.revokeObjectURL(blobUrl);
+                    }).catch(err => console.error(err));
+                } catch (exc) {
+                    console.log("Save Blob method failed with the following exception.");
+                    console.log(exc);
+                }
+            }
 
-
-
-
-
-</style>
-<body>
-    <div id="navbar">
-        <a href="#home">Home</a>
-        <a href="#news">News</a>
-        <a href="#contact">Contact</a>
-    </div>
-    <div id="map_canvas"></div>
-    <div id="control-box">
-         <button>Open</button>
-    </div>
-<body>
-<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js"></script>
-<script>
-
-
-
-
-
-class KartozaPolygon{
-    constructor(polygon, map){
-
-        this.map = map
-        this.polygon = polygon;
-        this.coordinates = new Array();
-        this.polylines = new Array();
-        this.createCoordinates();
-        this.createPolylines()
-
-
-        this.addOnClickListener(this)
-    }
-
-    export_to_file(){
-
-    }
-
-    createCoordinates(){
-        console.log(this.polygon)
-        this.polygon.forEach((coord) => {
-            console.log(coord)
-            this.coordinates.push(new google.maps.LatLng(coord[0], coord[1]));
-        });
-    }
-
-    createPolylines(){
-        this.polylines = new google.maps.Polyline({
-        path: this.coordinates,
-        strokeColor: '#'+Math.floor(Math.random()*16777215).toString(16),
-        strokeOpacity: 1.0,
-        strokeWeight: 4,
-        geodesic: false,
-        map: this.map});
-    }
-
-    addOnClickListener(self){
-        google.maps.event.addListener(this.polylines, 'click', function (event) {
-            alert(self.polygon);
-        });
-    }
-}
-const initialize = (() => {
-    var homeLatlng = new google.maps.LatLng{{ map_center }};
-        var myOptions = {
-            zoom: 8,
-            center: homeLatlng,
-            mapTypeId: google.maps.MapTypeId.ROADMAP
-        };
-        var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
-
-    const pollies = new Array();
-    const polygons = {{ polygons | safe }}
-    for (poly in polygons){
-        console.log(polygons[poly])
-        new KartozaPolygon( polygons[poly] , map);
-    }
+            const exportFile = () => {
+                const data = {
+                    file_id: selected_poly.file_id,
+                    name: selected_poly.name,
+                    geometry: {
+                        type: "Polygon",
+                        coordinates: selected_poly.data.coordinates
+                    }
+                }
+                fetch("{% url 'map_routing:export_to_gpkg_file' %}", {
+                    method: "POST",
+                    body: JSON.stringify(data),
+                    credentials: 'same-origin',
+                    headers: {
+                        "X-CSRFToken": getCookie("csrftoken")
+                    }
+                }).then(res => {
+                    downloadFileResponse(res);
+                    $('.ui.basic.modal.save').modal('hide');
+                });
+                return false;
+            }
 
 
-});
 
-google.maps.event.addDomListener(window, 'load', initialize);
 
-window.onscroll = function() {myFunction()};
+            class KartozaPolygon{
+            constructor(polygon, map){
 
-</script>
+                this.map = map
+                this.fileId = polygon.file_id
+                this.name = polygon.name
+                this.polygon = polygon.data;
+                this.coordinates = new Array();
+                this.polylines = new Array();
+                this.createCoordinates();
+                this.createPolylines()
+
+
+                this.addOnClickListener(this)
+            }
+
+
+            createCoordinates(){
+                this.polygon.forEach((coord) => {
+                    this.coordinates.push(new google.maps.LatLng(coord[0], coord[1]));
+                });
+            }
+
+            createPolylines(){
+                this.polylines = new google.maps.Polyline({
+                path: this.coordinates,
+                strokeColor: '#'+Math.floor(Math.random()*16777215).toString(16),
+                strokeOpacity: 1.0,
+                strokeWeight: 4,
+                geodesic: true,
+                map: this.map
+            });
+            }
+
+
+            addOnClickListener(self){
+                google.maps.event.addListener(this.polylines, 'click', function (event, fileId) {
+                    selected_poly = { data: self, file_id: self.fileId, name: self.name};
+                    $('.ui.basic.modal.save').modal('show');
+                });
+            }
+            }
+
+            const initialize = (() => {
+                {% if map_center %}
+                    var homeLatlng = new google.maps.LatLng{{ map_center }};
+                    var mapZoom = 8
+                {% else %}
+                    var homeLatlng = new google.maps.LatLng(0,0)
+                    var mapZoom = 4
+                {% endif %}
+                var myOptions = {
+                    zoom: mapZoom,
+                    center: homeLatlng,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP
+                };
+                var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+
+            const pollies = new Array();
+
+            for (poly in polygons){
+                pollies.push(new KartozaPolygon( polygons[poly] , map));
+            }
+
+
+            });
+
+            google.maps.event.addDomListener(window, 'load', initialize);
+
+
+         </script>
 </html>

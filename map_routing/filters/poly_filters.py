@@ -22,7 +22,9 @@ class PolySpikeFilter():
 
     def __init__(self, poly):
         """Instantiate object."""
-        self.polygon = poly
+        self.file_id = poly['file_id']
+        self.name = poly.get('name', '')
+        self.polygon = poly['coords']
         self.lat_coords = []
         self.lon_coords = []
         self.center_of_poly = None
@@ -79,7 +81,8 @@ class PolySpikeFilter():
                     spike_found = True
                     spike_index = index
 
-                elif value != self.dummy_value and spike_found is True:
+                elif value and previous_number and value != self.dummy_value \
+                        and spike_found is True:
                     coords[spike_index] = (value + previous_number) / 2
                     previous_number = None
                     spike_found = False

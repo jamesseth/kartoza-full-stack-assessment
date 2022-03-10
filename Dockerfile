@@ -49,4 +49,5 @@ COPY . .
 RUN chown -R django:django /app
 
 # Kick-off Gunicorn
-CMD exec gunicorn --bind :8000 --workers $NUMBER_OF_GUNICORN_WORKERS ${PROJECT_NAME}.wsgi:application
+# CMD exec gunicorn --bind :8000 --workers $NUMBER_OF_GUNICORN_WORKERS ${PROJECT_NAME}.wsgi:application
+CMD [ "python3", "manage.py", "runserver", "0.0.0.0:8000"]
