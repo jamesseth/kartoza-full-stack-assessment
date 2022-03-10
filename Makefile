@@ -81,7 +81,7 @@ test: ## Run Django unit-tests.
 
 .PHONY: ingest
 ingest:
-	ogr2ogr -update -append -progress -f PostgreSQL PG:"dbname=$(DJANGO_DB_NAME) host=$(DJANGO_DB_HOST) user=$(DJANGO_DB_USER) password=$(DJANGO_DB_PASS) port=$(DJANGO_DB_PORT)" "$(FILE_PATH)"
+	docker-compose exec django bash -c 'ogr2ogr  -f PostgreSQL PG:"dbname=$(DJANGO_DB_NAME) host=$(DJANGO_DB_HOST) user=$(DJANGO_DB_USER) password=$(DJANGO_DB_PASS) port=$(DJANGO_DB_PORT)" "$(FILE_PATH)"'
 
 .PHONY: export-to-gpkg
 export-to-gpkg:

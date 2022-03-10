@@ -21,4 +21,3 @@ Technical assessment to implement a noise reduction on a polygon geospace file.
 
     To ensure a restart of the container environments run:
     `make restart`
-

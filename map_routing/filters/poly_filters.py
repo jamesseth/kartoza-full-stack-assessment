@@ -22,7 +22,9 @@ class PolySpikeFilter():
 
     def __init__(self, poly):
         """Instantiate object."""
-        self.polygon = poly
+        self.file_id = poly['file_id']
+        self.name = poly.get('name', '')
+        self.polygon = poly['coords']
         self.lat_coords = []
         self.lon_coords = []
         self.center_of_poly = None
